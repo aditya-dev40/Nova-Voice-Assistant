@@ -8,6 +8,12 @@ music = {
 
 
 
+def getVideoLink(command):
+    video = command.lower().replace("youtube", "").strip()
+
+    video_query = video.replace(" ", "+")
+    return video, f"https://www.youtube.com/results?search_query={video_query}"
+
 def getSongLink(command):
     song = command.lower().replace("play", "").strip()
 
