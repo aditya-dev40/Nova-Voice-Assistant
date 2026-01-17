@@ -2,15 +2,21 @@ import speech_recognition as sr
 import webbrowser
 import keyboard
 
-from musicLibrary import getSongLink
+from musicLibrary import getSongLink, getVideoLink
 from newsLibrary import get_news_titles
 from assistant_actions import send_whatsapp_message, start_work_mode, start_movie_mode
 from sound_utils import speak, play_beep, play_stop_beep
+from listening_modes import ptt_listen, voice_active_listen
+
+
+# GLOBAL STATE
 
 r = sr.Recognizer()
 listening = False
-WAKE_WORDS = ["nova", "noa", "nava", "nover"]
+LISTENING_MODE = "ptt"   # "ptt" or "voice"
 
+
+# COMMAND EXECUTION
 
 def takeCommand():
     with sr.Microphone() as source:
@@ -21,51 +27,61 @@ def takeCommand():
 
 def processCommand(c):
     print("COMMAND RECEIVED:", c)
+    c = c.lower()
 
-    if "open google" in c.lower():
+    if "open google" in c:
         speak("Opening Google")
         webbrowser.open("https://www.google.com/")
-    elif "open youtube" in c.lower():
+
+    elif "open youtube" in c:
         speak("Opening Youtube")
         webbrowser.open("https://www.youtube.com/")
-    elif "open linkedin" in c.lower():
+
+    elif "open linkedin" in c:
         speak("Opening linkedin")
         webbrowser.open("https://www.linkedin.com/")
-    elif "open ground" in c.lower():
-        speak("Opening ground")
-        webbrowser.open("https://www.G.round.com/")
-    elif c.lower().startswith("play"):
+
+    elif "open github" in c:
+        speak("Opening github")
+        webbrowser.open("https://www.github.com/")
+
+    elif c.startswith("play"):
         song, link = getSongLink(c)
         speak(f"Playing {song}")
         webbrowser.open(link)
-        return
-    elif "news" in c.lower():
-        titles = get_news_titles()[:3]  # only top 3
-        for title in titles:
+
+    elif c.startswith("youtube"):
+        video, link = getVideoLink(c)
+        speak(f"Playing {video}")
+        webbrowser.open(link)
+
+    elif "news" in c:
+        for title in get_news_titles()[:3]:
             speak(title)
-        return
-    elif "send whatsapp message" in c.lower():
+
+    elif "send whatsapp message" in c:
         speak("Whom should I message?")
         contact = takeCommand()
 
         speak("What should I say?")
         message = takeCommand()
 
-        speak(f"Sending message to {contact}")
         send_whatsapp_message(contact, message)
         speak("Message sent")
-        return
-    elif "start work mode" in c.lower() or "work mode" in c.lower():
-        speak("Starting your work mode")
+
+    elif "work mode" in c:
+        speak("Starting work mode")
         start_work_mode()
-        speak("Work mode activated")
-    elif "start movie mode" in c.lower() or "movie mode" in c.lower():
-        speak("Starting your movie mode")
+
+    elif "movie mode" in c:
+        speak("Starting movie mode")
         start_movie_mode()
-        speak("movie mode activated")
 
     else:
         speak("Sorry, I didn't understand that command")
+
+
+# PTT HANDLERS
 
 def on_ptt_press(event):
     global listening
@@ -75,28 +91,27 @@ def on_ptt_press(event):
 
     listening = True
     play_beep()
-    print("PTT started")
+    print("F8 pressed")
 
-    try:
-        with sr.Microphone() as source:
-            r.adjust_for_ambient_noise(source, duration=0.4)
-            audio = r.listen(source, timeout=4, phrase_time_limit=3)
+    if LISTENING_MODE == "ptt":
+        print("PTT mode active")
+        wake_detected = ptt_listen(r)
 
-        word = r.recognize_google(audio, language="en-IN").lower()
-        print("Heard wake word:", word)
-
-        if any(w in word for w in WAKE_WORDS):
+        if wake_detected:
             speak("Yes Sir")
+            print("Listening for command...")
 
-            with sr.Microphone() as source:
-                r.adjust_for_ambient_noise(source, duration=0.4)
-                audio = r.listen(source, timeout=6, phrase_time_limit=10)
+            try:
+                command = takeCommand()
+                processCommand(command)
+            except Exception as e:
+                print("Command error:", e)
 
-            command = r.recognize_google(audio, language="en-IN")
-            processCommand(command)
+    elif LISTENING_MODE == "voice":
+        print("Voice mode active")
+        voice_mode()
 
-    except Exception as e:
-        print("Error:", e)
+
 
 def on_ptt_release(event):
     global listening
@@ -107,12 +122,48 @@ def on_ptt_release(event):
         print("PTT stopped")
 
 
+# VOICE MODE LOOP
+
+def voice_mode():
+    # Step 1: wait for wake word (nova)
+    wake_detected = ptt_listen(r)
+
+    if not wake_detected:
+        return
+
+    speak("Yes Sir")
+    print("Listening for command...")
+
+    try:
+        command = voice_active_listen(r)
+        if command:
+            processCommand(command)
+    except Exception as e:
+        print("Voice command error:", e)
+
+
+# MODE SWITCH
+
+def toggle_mode():
+    global LISTENING_MODE
+
+    if LISTENING_MODE == "ptt":
+        LISTENING_MODE = "voice"
+        speak("Voice mode enabled")
+        print("MODE → voice")
+    else:
+        LISTENING_MODE = "ptt"
+        speak("Push to talk mode enabled")
+        print("MODE → ptt")
+
+
+# MAIN
+
 if __name__ == "__main__":
     speak("Initializing Nova...")
 
     keyboard.on_press_key("f8", on_ptt_press)
     keyboard.on_release_key("f8", on_ptt_release)
+    keyboard.add_hotkey("ctrl+m", toggle_mode)
 
-    keyboard.wait()  
-
-   
+    keyboard.wait()
