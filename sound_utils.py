@@ -8,27 +8,36 @@ import pygame
 def speak(text):
     print("Nova says:", text)
 
-    async def _speak():
-        communicate = edge_tts.Communicate(
-            text=text,
-            voice="en-GB-RyanNeural"
-        )
-        await communicate.save("temp/Nova.mp3")
+    try:
+        os.makedirs("temp", exist_ok=True)
+        audio_path = os.path.join("temp", "Nova.mp3")
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(_speak())
-    loop.close()
+        async def _speak():
+            communicate = edge_tts.Communicate(
+                text=text,
+                voice="en-GB-RyanNeural"
+            )
+            await communicate.save(audio_path)
 
-    pygame.mixer.init()
-    pygame.mixer.music.load("temp/Nova.mp3")
-    pygame.mixer.music.play()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(_speak())
+        loop.close()
 
-    while pygame.mixer.music.get_busy():
-        time.sleep(0.1)
+        pygame.mixer.init()
+        pygame.mixer.music.load(audio_path)
+        pygame.mixer.music.play()
 
-    pygame.mixer.quit()
-    os.remove("temp/Nova.mp3")
+        while pygame.mixer.music.get_busy():
+            time.sleep(0.1)
+
+        pygame.mixer.quit()
+        os.remove(audio_path)
+
+    except Exception as e:
+        # NEVER crash Nova because of TTS
+        print("TTS error (ignored):", e)
+
 
 def play_beep():
     pygame.mixer.init()
