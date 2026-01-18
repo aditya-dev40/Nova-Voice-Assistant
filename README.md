@@ -46,16 +46,8 @@ python main.py
 
 Say **"Nova"** to activate and give commands.
 
-## Project Structure
-Nova-Voice-Assistant/
-│── main.py
-│── musicLibrary.py
-│── newsLibrary.py
-│── requirements.txt
-│── README.md
-│── .gitignore
 
 ## Future Plans
 - Add more commands
 - Improve recognition accuracy
-- Add ChatGPT API support later
+- Add generative ai API support later
