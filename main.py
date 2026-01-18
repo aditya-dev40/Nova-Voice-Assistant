@@ -1,6 +1,7 @@
 import speech_recognition as sr
 import webbrowser
 import keyboard
+import warnings; warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
 
 from musicLibrary import getSongLink
 from newsLibrary import get_news_titles
