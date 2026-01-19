@@ -9,7 +9,6 @@ from assistant_actions import (
     start_movie_mode,
     open_ott_search,
     close_All_Tabs_Apps,
-    shutdown_pc,
     confirm_shutdown
 )
 from ai_engine import ask_ai
@@ -64,12 +63,19 @@ def handle_command(text, speak, take_command):
         speak(f"Playing {song}")
         webbrowser.open(link)
         return True
+    
+    # ----- WORK MODE (EXPLICIT) -----
 
-    if "youtube" in c or "play video" in c or "play youtube video":
-
+    if "youtube" in c or "play video" in c or "play youtube video" in c:
         video, link = getVideoLink(c)
         speak(f"Playing {video}")
         webbrowser.open(link)
+        return True
+    
+    # ----- MOVIE MODE (EXPLICIT) -----
+    if "work mode" in c:
+        speak("Starting work mode")
+        start_work_mode()
         return True
     
     # ----- MOVIE MODE (EXPLICIT) -----
