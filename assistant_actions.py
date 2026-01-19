@@ -2,7 +2,9 @@ import pyautogui
 import time
 import webbrowser
 import os
-import urllib.parse
+import win32gui
+import threading
+
 
 
 def send_whatsapp_message(contact, message):
@@ -78,7 +80,6 @@ OTT_PROVIDERS = {
     }
 }
 
-\
 def open_ott_search(text: str, provider: str = DEFAULT_OTT):
     """
     Open OTT platform Explore page and search movie.
@@ -132,3 +133,113 @@ def open_ott_search(text: str, provider: str = DEFAULT_OTT):
     pyautogui.write(movie, interval=0.1)
     time.sleep(1)
     pyautogui.press("enter")
+
+
+
+TERMINAL_KEYWORDS = [
+    "command prompt",
+    "powershell",
+    "windows terminal",
+    "cmd",
+    "terminal",
+    "wsl",
+    "bash"
+]
+
+def is_terminal_window(title: str) -> bool:
+    title = title.lower()
+    return any(k in title for k in TERMINAL_KEYWORDS)
+
+import win32gui
+
+def focus_non_terminal_window() -> bool:
+    def enum_handler(hwnd, results):
+        if not win32gui.IsWindowVisible(hwnd):
+            return
+        title = win32gui.GetWindowText(hwnd)
+        if not title:
+            return
+        if is_terminal_window(title):
+            return
+        results.append(hwnd)
+
+    windows = []
+    win32gui.EnumWindows(enum_handler, windows)
+
+    if not windows:
+        return False  # nothing else to focus
+
+    try:
+        win32gui.SetForegroundWindow(windows[0])
+        return True
+    except Exception:
+        return False
+
+
+def close_All_Tabs_Apps():
+    max_actions = 20
+    actions = 0
+
+    while actions < max_actions:
+        hwnd = win32gui.GetForegroundWindow()
+        title = win32gui.GetWindowText(hwnd)
+
+        # If Nova (terminal) is focused → switch focus properly
+        if is_terminal_window(title):
+            switched = focus_non_terminal_window()
+            if not switched:
+                break  # nothing else to close
+            time.sleep(0.4)
+            continue
+
+        pyautogui.hotkey('alt', 'f4')
+        actions += 1
+        time.sleep(0.5)
+
+def confirm_shutdown(speak, take_command):
+    speak("Are you sure you want to shut down the PC?")
+
+    try:
+        reply = take_command()
+    except Exception:
+        speak("I didn't catch that. Shutdown cancelled.")
+        return
+
+    if not reply:
+        speak("Shutdown cancelled.")
+        return
+
+    reply = reply.lower()
+
+    if "yes" in reply or "s" in reply:
+        speak("Shutting down. Goodbye.")
+        shutdown_pc()
+        return
+
+    if "no" in reply or "cancel" in reply:
+        speak("Shutdown cancelled.")
+        return
+
+    speak("I didn't understand. Shutdown cancelled.")
+
+
+def shutdown_pc():
+    # 1️Close other apps
+    close_All_Tabs_Apps()
+    time.sleep(1)
+
+    # 2 Trigger Windows shutdown in background
+    def shutdown_os():
+        os.system("shutdown /s /t 0")
+
+    threading.Thread(target=shutdown_os, daemon=True).start()
+
+    # 3️ Give OS a moment to accept the command
+    time.sleep(0.5)
+
+    # 4️ Exit Nova LAST
+    os._exit(0)
+
+
+
+

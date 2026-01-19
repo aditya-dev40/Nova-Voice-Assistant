@@ -7,7 +7,10 @@ from assistant_actions import (
     send_whatsapp_message,
     start_work_mode,
     start_movie_mode,
-    open_ott_search
+    open_ott_search,
+    close_All_Tabs_Apps,
+    shutdown_pc,
+    confirm_shutdown
 )
 from ai_engine import ask_ai
 
@@ -48,6 +51,9 @@ def handle_command(text, speak, take_command):
     print("COMMAND RECEIVED:", text)
     c = text.lower().strip()
 
+    global shutdown_pending
+
+
     if len(c) < 2:
         speak("Yes?")
         return True
@@ -59,7 +65,8 @@ def handle_command(text, speak, take_command):
         webbrowser.open(link)
         return True
 
-    if "youtube" in c:
+    if "youtube" in c or "play video" in c or "play youtube video":
+
         video, link = getVideoLink(c)
         speak(f"Playing {video}")
         webbrowser.open(link)
@@ -97,6 +104,15 @@ def handle_command(text, speak, take_command):
         send_whatsapp_message(contact, message)
         speak("The message is being sent")
         return True
+    
+    if "close" in c or "tabs" in c or "apps" in c:
+        speak("closing all tabs")
+        close_All_Tabs_Apps()
+
+    if "shutdown" in c or "shut down" in c:
+        confirm_shutdown(speak, take_command)
+        return True  
+
 
     # ----- AI INTENT ROUTING -----
     if ai_intent_router(c, speak):
@@ -168,22 +184,29 @@ User: {text}
 def ai_chat(text, speak):
     global conversation_memory
 
+    # Store user message
     conversation_memory.append(f"User: {text}")
+
+    # Keep only last 6 messages
     conversation_memory = conversation_memory[-6:]
 
-    prompt = f"""
-{VOICE_RULES}
+    # Build prompt with recent conversation
+    prompt = (
+        VOICE_RULES
+        + "\n\nConversation so far:\n"
+        + "\n".join(conversation_memory)
+        + "\n\nNova:"
+    )
 
-Conversation so far:
-{chr(10).join(conversation_memory)}
-
-Nova:
-"""
-
+    # Ask AI
     reply = ask_ai(prompt).strip()
 
+    # Store AI reply
     conversation_memory.append(f"Nova: {reply}")
     conversation_memory = conversation_memory[-6:]
 
+    # Speak reply
     speak(reply)
+
     return True
+

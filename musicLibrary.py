@@ -6,21 +6,32 @@ music = {
             "faded": "https://youtu.be/60ItHLz5WEA"
 }
 
+def clean_search_text(command, remove_words):
+    text = command.lower()
+    for word in remove_words:
+        text = text.replace(word, "")
+    return " ".join(text.split())
+
 
 
 def getVideoLink(command):
-    video = command.lower().replace("youtube", "").strip()
+    video = clean_search_text(
+        command,
+        remove_words=["youtube", "play", "search", "for", "on"]
+    )
 
-    video_query = video.replace(" ", "+")
-    return video, f"https://www.youtube.com/results?search_query={video_query}"
+    query = video.replace(" ", "+")
+    return video, f"https://www.youtube.com/results?search_query={query}"
+
 
 def getSongLink(command):
-    song = command.lower().replace("play", "").strip()
+    song = clean_search_text(
+        command,
+        remove_words=["play", "song", "music", "on"]
+    )
 
-    if song in music:
-        return song, music[song]
+    query = song.replace(" ", "+")
+    return song, f"https://music.youtube.com/search?q={query}"
 
-    song_query = song.replace(" ", "+")
-    return song, f"https://music.youtube.com/search?q={song_query}"
 
 

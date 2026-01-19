@@ -11,11 +11,19 @@ AI_API_KEY = os.getenv("NOVA_AI_API_KEY")
 if AI_BACKEND == "cloud" and not AI_API_KEY:
     raise RuntimeError("NOVA_AI_API_KEY not set in .env")
 
+def ensure_ollama_running():
+    try:
+        requests.get("http://localhost:11434/api/tags", timeout=2)
+        return
+    except Exception:
+        print("ollama server down")
 
 def ask_ai(prompt: str) -> str:
     """
     Single entry point for AI.
     """
+    ensure_ollama_running()
+
     if AI_BACKEND == "cloud":
         return ask_cloud_model(prompt)
     return "Local AI not configured."
