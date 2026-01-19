@@ -9,8 +9,8 @@ def speak(text):
     print("Nova says:", text)
 
     try:
-        os.makedirs("temp", exist_ok=True)
-        audio_path = os.path.join("temp", "Nova.mp3")
+        os.makedirs("audio_cache", exist_ok=True)
+        audio_path = os.path.join("audio_cache", "Nova.mp3")
 
         async def _speak():
             communicate = edge_tts.Communicate(
