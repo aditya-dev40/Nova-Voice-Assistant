@@ -37,59 +37,87 @@ Because of this, the project is intentionally kept modular and flexible.
 
 This structure makes it easy to add new ideas without breaking existing code.
 
-How to Run
-Requirements
+## How to Run
 
-Python 3.12 (required)
-⚠️ Python 3.13 may cause issues with pygame. Use Python 3.12.
+Requirements:
+- Python 3.12 (required)
+  Python 3.13 may cause issues with pygame, so Python 3.12 is recommended.
+- Windows OS
+- A working microphone
 
-Step 1: Clone the repository
-git clone <your-repo-url>
-cd Nova-Voice-Assistant
+Steps to run the project:
 
-Step 2: Create a virtual environment
-python -m venv .venv
+1. Clone the repository and enter the project directory:
+   git clone <your-repo-url>
+   cd Nova-Voice-Assistant
 
+2. Create a virtual environment:
+   python -m venv .venv
 
-Activate it:
+3. Activate the virtual environment:
+   Windows (PowerShell):
+   .venv\Scripts\activate
 
-Windows (PowerShell)
+   Linux / macOS:
+   source .venv/bin/activate
 
-.venv\Scripts\activate
+4. Install all dependencies:
+   pip install -r requirements.txt
 
+   Note for Windows users:
+   If PyAudio fails to install, run:
+   pip install pipwin
+   pipwin install pyaudio
 
-Linux / macOS
+5. Run the assistant:
+   python main.py
 
-source .venv/bin/activate
+6. Use Nova:
+   Say "Nova" to wake the assistant.
+   Give voice commands after activation.
+   Use push-to-talk if configured.
+   Speak clearly for best recognition accuracy.
 
-Step 3: Install dependencies
-pip install -r requirements.txt
+---
 
+## Features
 
-⚠️ Note for Windows users:
-If pyaudio fails to install, run:
+- Wake-word based activation ("Nova")
+- Push-to-talk and continuous voice conversation modes
+- YouTube and YouTube Music search using direct search URLs
+- Work mode and movie mode automation
+- OTT platform search
+- WhatsApp message automation
+- Close all tabs/apps safely (terminal protected)
+- Safe PC shutdown with voice confirmation
+- AI-powered conversational fallback with short spoken replies
+- Modular and maintainable architecture
 
-pip install pipwin
-pipwin install pyaudio
+---
 
-Step 4: Run Nova
-python main.py
+## Known Limitations
 
-Step 5: Use the assistant
+- Optimized for Windows only
+- Requires Python 3.12 for full compatibility
+- Microphone quality affects recognition accuracy
+- Desktop automation depends on system focus and permissions
 
-Say “Nova” to wake the assistant
+---
 
-Give voice commands after the prompt
+## Future Plans
 
-Use push-to-talk if enabled
+- Improve speech recognition accuracy
+- Add more productivity and system commands
+- Refactor into FastAPI + OOP architecture
+- Add real cloud AI API support
+- Build a simple frontend for easier setup and usage
 
-Future Plans
+---
 
-Add more system and productivity commands
+## Disclaimer
 
-Improve speech recognition reliability
-
-Refactor into FastAPI + OOP architecture
+Nova performs system-level automation such as closing apps and shutting down the PC.  
+Use destructive commands carefully and at your own discretion.
 
 Add real cloud AI API support
 
