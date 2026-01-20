@@ -69,10 +69,19 @@ Steps to run the project:
    pip install pipwin
    pipwin install pyaudio
 
-5. Run the assistant:
+5. install ollama:
+   Download ollama and sign in using
+   your account and generate a API key
+   create a .env folder and paste the ai there
+   .env:
+   NOVA_AI_BACKEND=cloud
+   NOVA_AI_API_KEY=YOUR_API_KEY
+
+
+7. Run the assistant:
    python main.py
 
-6. Use Nova:
+8. Use Nova:
    Say "Nova" to wake the assistant.
    Give voice commands after activation.
    Use push-to-talk if configured.
