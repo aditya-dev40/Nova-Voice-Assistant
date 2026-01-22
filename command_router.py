@@ -66,10 +66,15 @@ def handle_command(text, speak, take_command):
     
     # ----- WORK MODE (EXPLICIT) -----
 
-    if "youtube" in c or "play video" in c or "play youtube video" in c:
+    if "play video" in c or "play youtube video" in c:
         video, link = getVideoLink(c)
         speak(f"Playing {video}")
         webbrowser.open(link)
+        return True
+    
+    if "open youtube" in c:
+        speak("opening youtube")
+        webbrowser.open("https://www.youtube.com/")
         return True
     
     # ----- MOVIE MODE (EXPLICIT) -----
@@ -117,8 +122,17 @@ def handle_command(text, speak, take_command):
 
     if "shutdown" in c or "shut down" in c:
         confirm_shutdown(speak, take_command)
-        return True  
+        return True 
 
+    if "open github" in c:
+        speak("opening github")
+        webbrowser.open("https://github.com/aditya-dev40?tab=repositories")
+        return True 
+    
+    if "open chatgpt" in c:
+        speak("opening chatgpt")
+        webbrowser.open("https://chatgpt.com/")
+        return True 
 
     # ----- AI INTENT ROUTING -----
     if ai_intent_router(c, speak):

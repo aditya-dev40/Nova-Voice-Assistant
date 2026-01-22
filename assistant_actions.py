@@ -87,24 +87,29 @@ def open_ott_search(text: str, provider: str = DEFAULT_OTT):
     """
 
     # -------- CLEAN MOVIE NAME --------
-    c = text.lower()
+    c = text.lower().strip()
 
-    triggers = [
-        "play a movie called",
-        "play movie called",
-        "watch a movie called",
-        "watch movie called",
-        "play movie",
-        "watch movie",
-        "play",
-        "watch"
-    ]
+    # Priority 1: everything after "called"
+    if "called" in c:
+        movie = c.split("called", 1)[1].strip()
+    else:
+        # Fallback cleanup
+        noise_words = [
+            "i want to",
+            "please",
+            "can you",
+            "play",
+            "watch",
+            "movie",
+            "a",
+            "the"
+        ]
 
-    movie = c
-    for t in triggers:
-        if t in c:
-            movie = c.replace(t, "").strip()
-            break
+        movie = c
+        for w in noise_words:
+            movie = movie.replace(w, "")
+
+        movie = " ".join(movie.split()).strip()
 
     if not movie:
         print("No movie name detected")
@@ -121,9 +126,9 @@ def open_ott_search(text: str, provider: str = DEFAULT_OTT):
     os.system('start chrome --profile-directory="Default"')
     time.sleep(2)
 
-    # -------- OPEN EXPLORE PAGE --------
+    # -------- OPEN ENTRY PAGE --------
     os.system(
-        f'start chrome --profile-directory="Default" "{ott["explore_url"]}"'
+        f'start chrome --profile-directory="Default" "{ott["entry_url"]}"'
     )
 
     # -------- WAIT FOR PAGE + PROFILE --------
