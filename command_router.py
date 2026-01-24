@@ -28,6 +28,24 @@ COMMANDS = {
     "open_github": lambda: webbrowser.open("https://www.github.com/")
 }
 
+recommendation_phrases = [
+    "which one",
+    "what should i watch",
+    "recommend",
+    "suggest",
+    "confused",
+    "help me choose"
+]
+
+question_words = [
+    "which",
+    "what",
+    "should i",
+    "between",
+    " or "
+]
+
+
 
 # ---------- VOICE RULES ----------
 VOICE_RULES = """
@@ -49,6 +67,8 @@ Ask the user if they want more details.
 def handle_command(text, speak, take_command):
     print("COMMAND RECEIVED:", text)
     c = text.lower().strip()
+    is_question = any(q in c for q in question_words)
+
 
     global shutdown_pending
 
@@ -89,9 +109,15 @@ def handle_command(text, speak, take_command):
         start_movie_mode()
         return True
 
+    if is_question or any(p in c for p in recommendation_phrases):
+        return ai_chat(text, speak)
 
     # ----- OTT SEARCH (GENERIC) -----
-    if "movie" in c or "watch" in c:
+    if (
+        not is_question
+        and ("watch" in c or "play" in c or "open" in c)
+        and "movie" in c
+    ):
         speak("Searching on streaming platform")
         open_ott_search(c)
         return True
@@ -137,9 +163,11 @@ def handle_command(text, speak, take_command):
     # ----- AI INTENT ROUTING -----
     if ai_intent_router(c, speak):
         return True
+    
 
     # ----- AI CHAT (WITH MEMORY) -----
     return ai_chat(text, speak)
+
 
 
 def ai_intent_router(text, speak):
